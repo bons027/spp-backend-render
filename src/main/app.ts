@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "../infrastructure/http/routes/authRoutes.js";
 import sppTariffRoutes from "../infrastructure/http/routes/sppTariffRoutes.js";
+import categoryRoutes from "../infrastructure/http/routes/categoryRoutes.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/spp-tariffs", sppTariffRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
