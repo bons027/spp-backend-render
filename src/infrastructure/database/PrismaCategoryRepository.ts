@@ -22,16 +22,33 @@ export class PrismaCategoryRepository implements ICategoryRepository {
       created.id,
       created.name,
       created.type,
-      created.schoolUnitId
+      created.schoolUnitId,
     );
   }
 
-  async findAll(filter?: { schoolUnitIds: (number | null)[] }): Promise<Category[]> {
+  async findAll(filter?: {
+    schoolUnitIds: (number | null)[];
+  }): Promise<Category[]> {
     const where: any = {};
     if (filter?.schoolUnitIds) {
-      where.schoolUnitId = {
-        in: filter.schoolUnitIds,
-      };
+      const nonNullIds = filter.schoolUnitIds.filter(
+        (id) => id !== null,
+      ) as number[];
+      const hasNull = filter.schoolUnitIds.includes(null);
+
+      if (hasNull && nonNullIds.length > 0) {
+        // Skenario Admin Unit: butuh yang schoolUnitId === null OR schoolUnitId IN [3]
+        where.OR = [
+          { schoolUnitId: null },
+          { schoolUnitId: { in: nonNullIds } },
+        ];
+      } else if (hasNull) {
+        // Skenario cadangan jika hanya meminta yang global saja
+        where.schoolUnitId = null;
+      } else {
+        // Skenario jika hanya meminta unit-unit tertentu tanpa global
+        where.schoolUnitId = { in: nonNullIds };
+      }
     }
 
     const categories = await this.prisma.category.findMany({
@@ -39,7 +56,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
     });
 
     return categories.map(
-      (c) => new Category(c.id, c.name, c.type, c.schoolUnitId)
+      (c) => new Category(c.id, c.name, c.type, c.schoolUnitId),
     );
   }
 
@@ -54,15 +71,19 @@ export class PrismaCategoryRepository implements ICategoryRepository {
       category.id,
       category.name,
       category.type,
-      category.schoolUnitId
+      category.schoolUnitId,
     );
   }
 
-  async update(id: number, data: Partial<Omit<Category, "id">>): Promise<Category> {
+  async update(
+    id: number,
+    data: Partial<Omit<Category, "id">>,
+  ): Promise<Category> {
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.type !== undefined) updateData.type = data.type;
-    if (data.schoolUnitId !== undefined) updateData.schoolUnitId = data.schoolUnitId;
+    if (data.schoolUnitId !== undefined)
+      updateData.schoolUnitId = data.schoolUnitId;
 
     const updated = await this.prisma.category.update({
       where: { id },
@@ -73,7 +94,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
       updated.id,
       updated.name,
       updated.type,
-      updated.schoolUnitId
+      updated.schoolUnitId,
     );
   }
 
