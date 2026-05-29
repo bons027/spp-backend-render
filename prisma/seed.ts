@@ -196,6 +196,24 @@ async function main() {
   });
 
   console.log('Data siswa pengujian berhasil disiapkan.');
+
+  console.log('🔄 Menyinkronkan database sequence auto-increment...');
+
+  // Daftar tabel yang menggunakan ID auto-increment statis di seeder
+  const tables = ['school_units', 'categories'];
+
+  for (const tableName of tables) {
+    await prisma.$executeRawUnsafe(`
+      SELECT setval(
+        pg_get_serial_sequence('"${tableName}"', 'id'),
+        coalesce(max(id), 0) + 1,
+        false
+      ) FROM "${tableName}";
+    `);
+  }
+
+  console.log('✅ Semua database sequence berhasil disinkronkan!');
+
   console.log('\n=== Proses Seeding Selesai dengan Sukses! ===');
 }
 
