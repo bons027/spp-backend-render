@@ -3,6 +3,7 @@ import type { IUserRepository } from "../../domain/repositories/IUserRepository.
 import type { ISppTariffRepository } from "../../domain/repositories/ISppTariffRepository.js";
 import type { PasswordHasher } from "../../infrastructure/services/PasswordHasher.js";
 import type { Student } from "../../domain/entities/Student.js";
+import { BadRequestError, NotFoundError } from "../../domain/errors/AppError.js";
 
 export interface CreateStudentRequest {
   studentNumber: string;
@@ -30,7 +31,7 @@ export class CreateStudentUseCase {
       data.studentNumber
     );
     if (existingStudent) {
-      throw new Error("Gagal: Nomor induk siswa (NIS) sudah terdaftar");
+      throw new BadRequestError("Gagal: Nomor induk siswa (NIS) sudah terdaftar");
     }
 
     // 2. Cek ketersediaan tarif dasar
@@ -39,7 +40,7 @@ export class CreateStudentUseCase {
       data.enrollmentYear
     );
     if (!tariff) {
-      throw new Error(
+      throw new NotFoundError(
         "Gagal: Tarif dasar SPP untuk unit dan angkatan ini belum dikonfigurasi"
       );
     }

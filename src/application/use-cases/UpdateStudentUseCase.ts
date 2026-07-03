@@ -1,5 +1,6 @@
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { Student } from "../../domain/entities/Student.js";
+import { NotFoundError, ForbiddenError } from "../../domain/errors/AppError.js";
 
 export class UpdateStudentUseCase {
   constructor(private studentRepository: IStudentRepository) {}
@@ -12,11 +13,11 @@ export class UpdateStudentUseCase {
     const student = await this.studentRepository.findById(id);
 
     if (!student) {
-      throw new Error("Data siswa tidak ditemukan");
+      throw new NotFoundError("Data siswa tidak ditemukan");
     }
 
     if (user.role === "UNIT_ADMIN" && student.schoolUnitId !== user.schoolUnitId) {
-      throw new Error("Akses ditolak: Anda tidak memiliki otoritas untuk mengelola unit sekolah ini");
+      throw new ForbiddenError("Akses ditolak: Anda tidak memiliki otoritas untuk mengelola unit sekolah ini");
     }
 
     return this.studentRepository.update(id, data);
