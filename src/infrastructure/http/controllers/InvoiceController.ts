@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { ForbiddenError, NotFoundError } from "../../../domain/errors/AppError.js";
 import type { ProcessOfflinePaymentUseCase } from "../../../application/use-cases/ProcessOfflinePaymentUseCase.js";
 import type { IStudentRepository } from "../../../domain/repositories/IStudentRepository.js";
 
@@ -16,20 +17,12 @@ export class InvoiceController {
       // Multi-unit isolation check
       const student = await this.studentRepository.findByStudentNumber(studentNumber);
       if (!student) {
-        res.status(404).json({
-          success: false,
-          message: "Siswa tidak ditemukan",
-        });
-        return;
+        throw new NotFoundError("Siswa tidak ditemukan");
       }
 
       if (user.role === "UNIT_ADMIN") {
         if (student.schoolUnitId !== user.schoolUnitId) {
-          res.status(403).json({
-            success: false,
-            message: "Akses ditolak: Anda tidak memiliki otoritas untuk mengelola unit sekolah ini",
-          });
-          return;
+          throw new ForbiddenError("Akses ditolak: Anda tidak memiliki otoritas untuk mengelola unit sekolah ini");
         }
       }
 
@@ -46,16 +39,6 @@ export class InvoiceController {
         data: result,
       });
     } catch (error: any) {
-      if (
-        error.message.startsWith("Gagal:") ||
-        error.message === "Siswa tidak ditemukan"
-      ) {
-        res.status(400).json({
-          success: false,
-          message: error.message,
-        });
-        return;
-      }
       next(error);
     }
   }

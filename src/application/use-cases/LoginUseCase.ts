@@ -1,6 +1,7 @@
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { User } from "../../domain/entities/User.js";
 import type { PasswordHasher } from "../../infrastructure/services/PasswordHasher.js";
+import { UnauthorizedError } from "../../domain/errors/AppError.js";
 
 export class LoginUseCase {
   constructor(
@@ -19,7 +20,7 @@ export class LoginUseCase {
     }
 
     if (!user) {
-      throw new Error("Email/Nomor HP atau password salah");
+      throw new UnauthorizedError("Email/Nomor HP atau password salah");
     }
 
     const isPasswordValid = await this.passwordHasher.compare(
@@ -28,7 +29,7 @@ export class LoginUseCase {
     );
 
     if (!isPasswordValid) {
-      throw new Error("Email/Nomor HP atau password salah");
+      throw new UnauthorizedError("Email/Nomor HP atau password salah");
     }
 
     return user;

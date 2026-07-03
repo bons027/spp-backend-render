@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { UnauthorizedError } from "../../../domain/errors/AppError.js";
 import type { LoginUseCase } from "../../../application/use-cases/LoginUseCase.js";
 import type { PasswordHasher } from "../../services/PasswordHasher.js";
 import type { TokenService } from "../../services/TokenService.js";
@@ -53,21 +54,13 @@ export class AuthController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: "Autentikasi gagal: Sesi tidak valid atau telah berakhir",
-        });
-        return;
+        throw new UnauthorizedError("Autentikasi gagal: Sesi tidak valid atau telah berakhir");
       }
 
       const user = await this.userRepository.findById(userId);
 
       if (!user) {
-        res.status(401).json({
-          success: false,
-          message: "Autentikasi gagal: Sesi tidak valid atau telah berakhir",
-        });
-        return;
+        throw new UnauthorizedError("Autentikasi gagal: Sesi tidak valid atau telah berakhir");
       }
 
       res.status(200).json({

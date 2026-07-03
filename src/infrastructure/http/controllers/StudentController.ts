@@ -1,4 +1,5 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
+import { ForbiddenError } from "../../../domain/errors/AppError.js";
 import type { CreateStudentUseCase } from "../../../application/use-cases/CreateStudentUseCase.js";
 import type { GetStudentsUseCase } from "../../../application/use-cases/GetStudentsUseCase.js";
 import type { UpdateStudentUseCase } from "../../../application/use-cases/UpdateStudentUseCase.js";
@@ -12,7 +13,7 @@ export class StudentController {
     private deleteStudentUseCase: DeleteStudentUseCase
   ) {}
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const {
         studentNumber,
@@ -28,10 +29,7 @@ export class StudentController {
 
       // Isolasi unit sekolah untuk UNIT_ADMIN
       if (req.user?.role === "UNIT_ADMIN" && schoolUnitId !== req.user.schoolUnitId) {
-        return res.status(403).json({
-          success: false,
-          message: "Akses ditolak: Anda tidak memiliki otoritas untuk mendaftarkan siswa di unit sekolah ini",
-        });
+        throw new ForbiddenError("Akses ditolak: Anda tidak memiliki otoritas untuk mendaftarkan siswa di unit sekolah ini");
       }
 
       const student = await this.createStudentUseCase.execute({
@@ -52,14 +50,11 @@ export class StudentController {
         data: student,
       });
     } catch (error: any) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
+      next(error);
     }
   }
 
-  async getAll(req: Request, res: Response) {
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       let { schoolUnitId, search, className } = req.query;
 
@@ -87,14 +82,11 @@ export class StudentController {
         data: students,
       });
     } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+      next(error);
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params as { id: string };
       const { name, discountPercentage } = req.body;
@@ -111,15 +103,11 @@ export class StudentController {
         data: student,
       });
     } catch (error: any) {
-      const status = error.message.includes("Akses ditolak") ? 403 : 400;
-      return res.status(status).json({
-        success: false,
-        message: error.message,
-      });
+      next(error);
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params as { id: string };
 
@@ -130,11 +118,7 @@ export class StudentController {
         message: "Data siswa berhasil dihapus",
       });
     } catch (error: any) {
-      const status = error.message.includes("Akses ditolak") ? 403 : 400;
-      return res.status(status).json({
-        success: false,
-        message: error.message,
-      });
+      next(error);
     }
   }
 }
