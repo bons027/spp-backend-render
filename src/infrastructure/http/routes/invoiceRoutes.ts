@@ -62,4 +62,25 @@ router.post(
   invoiceController.payOnlineSimulated.bind(invoiceController)
 );
 
+// Pakasir Payment Gateway Routes
+router.post(
+  "/pakasir/create",
+  invoiceController.createPakasirTransaction.bind(invoiceController)
+);
+
+router.get(
+  "/pakasir/status",
+  invoiceController.checkPakasirStatus.bind(invoiceController)
+);
+
+router.post(
+  "/pakasir/webhook",
+  invoiceController.handlePakasirWebhook.bind(invoiceController)
+);
+
+router.post(
+  "/pakasir/simulate",
+  invoiceController.simulatePakasirPayment.bind(invoiceController)
+);
+
 export default router;
