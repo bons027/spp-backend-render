@@ -132,7 +132,7 @@ router.post(
       for (let index = 0; index < rows.length; index++) {
         const row = rows[index];
         try {
-          const studentNumber = (row.nis || row.studentNumber || "").toString().trim();
+          let studentNumber = (row.nis || row.studentNumber || "").toString().trim();
           const name = (row.nama || row.name || "").toString().trim();
           const className = (row.kelas || row.className || "N/A").toString().trim();
           const unitName = (row.unit || row.schoolUnitName || "SD").toString().trim();
@@ -140,11 +140,20 @@ router.post(
           const discountStr = (row.diskon || row.discountPercentage || "0").toString().trim();
           const birthDate = (row.tanggal_lahir || row.birthDate || "").toString().trim();
           const parentName = (row.nama_ortu || row.parentName || `Wali dari ${name}`).toString().trim();
-          const parentPhoneNumber = (row.hp_ortu || row.parentPhoneNumber || "").toString().trim();
+          let parentPhoneNumber = (row.hp_ortu || row.parentPhoneNumber || "").toString().trim();
           const parentEmail = (row.email_ortu || row.parentEmail || "").toString().trim();
 
-          if (!studentNumber || !name || !parentPhoneNumber) {
-            throw new Error("NIS, Nama Siswa, dan No HP Wali wajib diisi");
+          if (!name) {
+            throw new Error("Nama Siswa wajib diisi");
+          }
+
+          if (!studentNumber) {
+            const cleanClass = className.toUpperCase().replace(/[^A-Z]/g, "") || "KB";
+            studentNumber = `${cleanClass}-${new Date().getFullYear()}-${String(index + 1).padStart(3, "0")}`;
+          }
+
+          if (!parentPhoneNumber) {
+            parentPhoneNumber = `089999999${String(index + 1).padStart(3, "0")}`;
           }
 
           const schoolUnitId = getUnitIdByName(unitName);
