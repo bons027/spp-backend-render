@@ -62,11 +62,21 @@ export class InvoiceController {
 
       if ((user.role as any) === "UNIT_ADMIN") {
         where.schoolUnitId = user.schoolUnitId;
+        if (req.query.className) {
+          where.className = (req.query.className as string).trim();
+        }
       } else if ((user.role as any) === "WALI_KELAS") {
         where.schoolUnitId = user.schoolUnitId;
         where.className = userClassName;
       } else if ((user.role as any) === "PARENT") {
         where.parentId = user.id;
+      } else {
+        if (req.query.schoolUnitId) {
+          where.schoolUnitId = Number(req.query.schoolUnitId);
+        }
+        if (req.query.className) {
+          where.className = (req.query.className as string).trim();
+        }
       }
 
       const students = await prisma.student.findMany({
