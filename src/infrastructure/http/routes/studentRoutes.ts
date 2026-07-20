@@ -133,7 +133,7 @@ router.post(
         const row = rows[index];
         try {
           let studentNumber = (row.nis || row.studentNumber || "").toString().trim();
-          const name = (row.nama || row.name || "").toString().trim();
+          let name = (row.nama || row.name || row.nama_ortu || row.parentName || "").toString().trim();
           const className = (row.kelas || row.className || "N/A").toString().trim();
           const unitName = (row.unit || row.schoolUnitName || "SD").toString().trim();
           const enrollmentYearStr = (row.angkatan || row.enrollmentYear || new Date().getFullYear()).toString().trim();
@@ -144,7 +144,7 @@ router.post(
           const parentEmail = (row.email_ortu || row.parentEmail || "").toString().trim();
 
           if (!name) {
-            throw new Error("Nama Siswa wajib diisi");
+            name = `Siswa ${index + 1}`;
           }
 
           if (!studentNumber) {
