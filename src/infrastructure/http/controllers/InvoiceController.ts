@@ -226,9 +226,21 @@ export class InvoiceController {
 
       if ((user.role as any) === "UNIT_ADMIN") {
         where.schoolUnitId = user.schoolUnitId;
+        if (req.query.className) {
+          where.className = String(req.query.className);
+        }
       } else if ((user.role as any) === "WALI_KELAS") {
         where.schoolUnitId = user.schoolUnitId;
-        where.className = userClassName;
+        if (userClassName) {
+          where.className = userClassName;
+        }
+      } else {
+        if (req.query.schoolUnitId) {
+          where.schoolUnitId = Number(req.query.schoolUnitId);
+        }
+        if (req.query.className) {
+          where.className = String(req.query.className);
+        }
       }
 
       const students = await prisma.student.findMany({
@@ -321,11 +333,13 @@ export class InvoiceController {
         recap.push({
           schoolUnitId: group.unitId,
           schoolUnit: schoolUnit?.name || "-",
+          schoolUnitName: schoolUnit?.name || "-",
           className: group.className,
           totalStudents: totalStudentsInClass,
           unpaidStudentsCount: studentsWithUnpaid,
           totalUnpaidMonths: totalUnpaidMonthsClass,
           totalUnpaidNominal: totalUnpaidNominalClass,
+          totalUnpaidAmount: totalUnpaidNominalClass,
         });
       }
 
