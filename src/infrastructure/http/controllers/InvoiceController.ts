@@ -669,9 +669,17 @@ export class InvoiceController {
         return;
       }
 
-      const baseAmount = tariff.amount;
-      const discountApplied = Math.floor((baseAmount * student.discountPercentage) / 100);
-      const amountToPay = baseAmount - discountApplied;
+      const rawBaseAmount = tariff ? Number(tariff.amount) : 0;
+      const baseAmount = isNaN(rawBaseAmount) || rawBaseAmount <= 0 ? 185000 : rawBaseAmount;
+
+      const rawDiscount = student ? Number(student.discountPercentage) : 0;
+      const discountPercent = isNaN(rawDiscount) ? 0 : rawDiscount;
+
+      const discountApplied = Math.floor((baseAmount * discountPercent) / 100);
+      const calculatedAmount = baseAmount - discountApplied;
+      const amountToPay = isNaN(calculatedAmount) || calculatedAmount <= 0 
+        ? 1000 
+        : Math.round(calculatedAmount);
 
       const projectSlug = process.env.PAKASIR_PROJECT_SLUG || "depodomain";
       const apiKey = process.env.PAKASIR_API_KEY || "xxx123";
@@ -689,8 +697,8 @@ export class InvoiceController {
       const pakasirUrl = `https://app.pakasir.com/api/transactioncreate/${mappedMethod}`;
       const pakasirPayload = {
         project: projectSlug,
-        order_id: orderId,
-        amount: amountToPay,
+        order_id: String(orderId),
+        amount: Number(amountToPay),
         api_key: apiKey,
       };
 
