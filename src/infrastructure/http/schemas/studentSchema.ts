@@ -12,7 +12,9 @@ export const createStudentSchema = z.object({
     parentEmail: z
       .string()
       .email({ message: "Format email tidak valid" })
-      .optional(),
+      .optional()
+      .nullable(),
     parentPhoneNumber: z.string({ required_error: "Nomor HP orang tua wajib diisi" }),
+    birthDate: z.string().optional().nullable(),
   }),
 });
