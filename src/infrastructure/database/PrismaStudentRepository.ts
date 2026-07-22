@@ -184,7 +184,6 @@ export class PrismaStudentRepository implements IStudentRepository {
     if (className !== undefined) studentData.className = className;
     if (enrollmentYear !== undefined) studentData.enrollmentYear = enrollmentYear;
     if (discountPercentage !== undefined) studentData.discountPercentage = discountPercentage;
-    if (birthDate !== undefined) studentData.birthDate = birthDate;
     if (schoolUnitId !== undefined) {
       studentData.schoolUnit = {
         connect: { id: schoolUnitId }
